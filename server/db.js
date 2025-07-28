@@ -1,8 +1,11 @@
-const {Pool}= require("pg");
-require("dotenv").config();
+const { Pool } = require("pg");
 
-const pool= new Pool({
-  connectionString: process.env.DATABASE_URL,
+const pool = new Pool({
+  user: "vougi",
+  host: "localhost",
+  database: "quotes_db",
+  password: "Strong4hold!",
+  port: 5432,
 });
 
-module.exports= pool; 
+module.exports = pool
