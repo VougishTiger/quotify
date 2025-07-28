@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Auth from "./auth";
 import { jwtDecode } from "jwt-decode";
+import "./App.css";
+
+
 
 const App = () => {
   const [quote, setQuote] = useState(null);
@@ -83,7 +86,7 @@ const App = () => {
   }
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "600px", margin: "0 auto" }}>
+    <div className="container">
       <h2>Welcome, {user.name}</h2>
       <button onClick={logout}>Logout</button>
 
@@ -93,7 +96,7 @@ const App = () => {
       <button onClick={getQuote}>Get Quote</button>
 
       {quote && (
-        <div style={{ marginTop: "1rem", border: "1px solid #ccc", padding: "1rem" }}>
+        <div className="quote-card">
           <p>"{quote.content}"</p>
           <p style={{ textAlign: "right" }}>— {quote.author}</p>
           <button onClick={saveFavorite}>Save to Favorites</button>
@@ -104,7 +107,7 @@ const App = () => {
 
       <button onClick={loadFavorites}>View My Favorites</button>
 
-      <ul>
+      <ul className="favorites-list">
         {favorites.map((fav) => (
           <li key={fav.id}>
             "{fav.text}" — <i>{fav.author}</i>

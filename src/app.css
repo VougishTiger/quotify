@@ -1,0 +1,58 @@
+body {
+  font-family: 'Georgia', serif;
+  background: linear-gradient(to bottom right, #fefcea, #f1da36);
+  margin: 0;
+  padding: 2rem;
+  color: #333;
+}
+
+.container {
+  max-width: 800px;
+  margin: auto;
+  padding: 2rem;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-radius: 12px;
+}
+
+h2, h3 {
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+  color: #222;
+}
+
+button {
+  background-color: #f1c40f;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin: 0.5rem 0;
+}
+
+button:hover {
+  background-color: #d4ac0d;
+}
+
+.quote-card {
+  margin-top: 1rem;
+  background: #fdf6e3;
+  border-left: 5px solid #f39c12;
+  padding: 1rem;
+  border-radius: 8px;
+  font-style: italic;
+}
+
+.favorites-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.favorites-list li {
+  background: #f0f8ff;
+  margin-bottom: 0.5rem;
+  padding: 0.75rem;
+  border-left: 4px solid #3498db;
+  border-radius: 6px;
+}
