@@ -4,7 +4,10 @@ const jwt = require("jsonwebtoken");
 const db = require("./db");
 const router = express.Router();
 
-const SECRET = process.env.JWT_SECRET || "supersecretkey";
+const SECRET = process.env.JWT_SECRET;
+if (!SECRET) {
+  throw new Error("❌ JWT_SECRET is not defined");
+}
 
 router.post("/signup", async (req, res) => {
   console.log("Signup request body:", req.body);

@@ -1,5 +1,8 @@
 const jwt = require("jsonwebtoken");
-const SECRET = process.env.JWT_SECRET || "supersecretkey";
+const SECRET = process.env.JWT_SECRET;
+if (!SECRET) {
+  throw new Error("❌ JWT_SECRET is not defined");
+}
 
 
 const authenticateToken = (req, res, next) => {

@@ -1,124 +1,94 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Auth from "./auth";
-import { jwtDecode } from "jwt-decode";
-import "./App.css";
+import "./app.css";
 
+const API = import.meta.env.VITE_API_URL;
 
-
-const App = () => {
+function App() {
   const [quote, setQuote] = useState(null);
   const [favorites, setFavorites] = useState([]);
-  const [token, setToken] = useState(localStorage.getItem("token"));
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
-   if (token) {
-    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  const fetchQuote = async () => {
     try {
-      const decoded = jwtDecode(token);
-      setUser(decoded);
-      console.log("Decoded user from token:", decoded);
+      const res = await axios.get(`${API}/api/quote`);
+      setQuote(res.data);
     } catch (err) {
-      console.error("Invalid token", err);
-      setUser(null);
+      console.error(err);
     }
-  } else {
-    delete axios.defaults.headers.common["Authorization"];
-    setUser(null);
-  }
-  }, [token]);
+  };
 
-  const getQuote = async () => {
-    const res = await axios.get("http://localhost:5000/api/quote");
-    setQuote(res.data);
+  const fetchFavorites = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      const res = await axios.get(`${API}/api/favorites`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setFavorites(res.data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const saveFavorite = async () => {
-    if (!quote || !quote.content) {
-    alert("No quote loaded to save!");
-    return;
-  }
-
-  try {
-    console.log("Saving this quote:", quote);
-    console.log("Sending to backend:", {
-      text: quote.content,
-      author: quote.author || "Unknown"
-    });
-
-    await axios.post("http://localhost:5000/api/favorites", {
-      text: quote.content,
-      author: quote.author || "Unknown"
-    });
-
-    alert("Favorite saved!");
-  } catch (error) {
-    console.error("Error saving favorite:", error.response?.data || error.message);
-  }
-  };
-
-  const loadFavorites = async () => {
-     try {
-    console.log("Loading favorites...");
-    const res = await axios.get("http://localhost:5000/api/favorites");
-    console.log("Favorites received:", res.data);
-    setFavorites(res.data);
-  } catch (err) {
-    console.error("Error loading favorites:", err.response?.data || err.message);
-  }
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return alert("You must log in first");
+      const res = await axios.post(
+        `${API}/api/favorites`,
+        quote,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setFavorites([...favorites, res.data]);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const deleteFavorite = async (id) => {
-    await axios.delete(`http://localhost:5000/api/favorites/${id}`);
-    loadFavorites();
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      await axios.delete(`${API}/api/favorites/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setFavorites(favorites.filter((f) => f.id !== id));
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    setUser(null);
-    setToken(null);
-    setFavorites([]);
-  };
-
-  if (!token || !user) {
-    return <Auth setUser={setUser} setToken={setToken} />;
-  }
+  useEffect(() => {
+    fetchQuote();
+    fetchFavorites();
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) setUser(JSON.parse(storedUser));
+  }, []);
 
   return (
     <div className="container">
-      <h2>Welcome, {user.name}</h2>
-      <button onClick={logout}>Logout</button>
-
-      <hr />
-
-      <h3>Random Quote Generator</h3>
-      <button onClick={getQuote}>Get Quote</button>
-
+      <h1>Quotify</h1>
       {quote && (
-        <div className="quote-card">
+        <div className="quote">
           <p>"{quote.content}"</p>
-          <p style={{ textAlign: "right" }}>— {quote.author}</p>
-          <button onClick={saveFavorite}>Save to Favorites</button>
+          <h4>- {quote.author}</h4>
+          <button onClick={saveFavorite}>❤️ Save</button>
+          <button onClick={fetchQuote}>🔄 New Quote</button>
         </div>
       )}
 
-      <hr />
-
-      <button onClick={loadFavorites}>View My Favorites</button>
-
-      <ul className="favorites-list">
-        {favorites.map((fav) => (
-          <li key={fav.id}>
-            "{fav.text}" — <i>{fav.author}</i>
-            <button onClick={() => deleteFavorite(fav.id)} style={{ marginLeft: "1rem" }}>
-              Delete
-            </button>
+      <h2>Favorites</h2>
+      <ul>
+        {favorites.map((f) => (
+          <li key={f.id}>
+            "{f.text}" - {f.author}
+            <button onClick={() => deleteFavorite(f.id)}>🗑️ Delete</button>
           </li>
         ))}
       </ul>
     </div>
   );
-};
+}
 
 export default App;

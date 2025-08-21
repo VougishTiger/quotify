@@ -1,14 +1,11 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const Auth = ({ setToken }) => {
+const API = import.meta.env.VITE_API_URL;
+
+function Auth({ setUser }) {
   const [isLogin, setIsLogin] = useState(true);
-  const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: ""
-  });
+  const [form, setForm] = useState({ name: "", email: "", password: "" });
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -16,75 +13,53 @@ const Auth = ({ setToken }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      const url = isLogin
-        ? "http://localhost:5000/api/auth/login"
-        : "http://localhost:5000/api/auth/signup";
-
-      const body = isLogin
-        ? { email: form.email, password: form.password }
-        : {
-            firstName: form.firstName,
-            lastName: form.lastName,
-            email: form.email,
-            password: form.password
-          };
-
-      const res = await axios.post(url, body);
-      const token = res.data.token;
+      const url = isLogin ? `${API}/api/auth/login` : `${API}/api/auth/signup`;
+      const res = await axios.post(url, form);
+      const { token, user } = res.data;
       localStorage.setItem("token", token);
-      setToken(token); 
+      localStorage.setItem("user", JSON.stringify(user));
+      setUser(user);
     } catch (err) {
-      console.error("Auth failed", err);
-      alert("Authentication failed. Check your info and try again.");
+      console.error(err);
+      alert("Authentication failed");
     }
   };
 
   return (
-    <div style={{ maxWidth: "400px", margin: "2rem auto", padding: "1rem", border: "1px solid #ccc" }}>
-      <h2>{isLogin ? "Log In" : "Sign Up"}</h2>
+    <div>
+      <h2>{isLogin ? "Login" : "Sign Up"}</h2>
       <form onSubmit={handleSubmit}>
         {!isLogin && (
-          <>
-            <input
-              name="firstName"
-              placeholder="First Name"
-              value={form.firstName}
-              onChange={handleChange}
-              required
-            />
-            <input
-              name="lastName"
-              placeholder="Last Name"
-              value={form.lastName}
-              onChange={handleChange}
-              required
-            />
-          </>
+          <input
+            type="text"
+            name="name"
+            placeholder="Name"
+            value={form.name}
+            onChange={handleChange}
+          />
         )}
         <input
+          type="email"
           name="email"
           placeholder="Email"
           value={form.email}
           onChange={handleChange}
-          required
         />
         <input
+          type="password"
           name="password"
           placeholder="Password"
-          type="password"
           value={form.password}
           onChange={handleChange}
-          required
         />
-        <button type="submit">{isLogin ? "Log In" : "Sign Up"}</button>
+        <button type="submit">{isLogin ? "Login" : "Sign Up"}</button>
       </form>
-      <button onClick={() => setIsLogin(!isLogin)} style={{ marginTop: "1rem" }}>
-        {isLogin ? "Need to create an account?" : "Already have an account?"}
+      <button onClick={() => setIsLogin(!isLogin)}>
+        {isLogin ? "Need an account? Sign Up" : "Have an account? Login"}
       </button>
     </div>
   );
-};
+}
 
 export default Auth;
